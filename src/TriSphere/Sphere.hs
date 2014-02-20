@@ -4,27 +4,31 @@ import Data.IORef
 
 data State = State
 
--- |Define triangle sides
-trA = 1.0
-trB = l6r/2
-trC = sqrt $ trA^2 + trB^2
-
 animate can time = do
   render can $ do
     bg
     translate (canW/2, canH/2) $ do
-    color red    $ circ trC
-    color green  $ stroke $ tria
-    color yellow $ stroke $ arc_ hypo 0 arcang
-    color white  $ scale (1,-1) $ stroke $ tria
-    color yellow $ translate (-canW/2,0) $ statusBar
+      color red   $ stroke $ circ sphereR
+      color green $ stroke $ triL triA triB
+      color white $ scale (1,-1) $ stroke $ triL triA triB
+      color green $ stroke $ arcD sphereR triAng
+      --
+      translate (-canW/2,0) $ color yellow $ statusBar
   setTimeout 10 $ animate can (time+1)
-  where hypo = trC --sqrt $ (trR*trR)+((l6r/2)*(l6r/2))
-        arcang = ang (l6r/2) hypo
+  where sphereR = triH
+        triA = 1.0
+        triB = 4
+        triH = hypo triA triB
+        triAng = triAngleD triB triH
+        
         statusBar = do
-          text (0, 0) $ "Hypo="  ++ (show hypo)
-          text (0,16) $ "ArcL="  ++ (show $ arcLen hypo arcang)
-          text (0,32) $ "CircL=" ++ (show $ l6r*2*pi)
+          mapM_ (\(n,(t,v)) -> text (0,n*12) $ t ++ (show v)) $ zip [0..]
+           [("arcL=",arcLen sphereR triAng)
+           ,("triA=",triA)
+           ,("triB=",triB)
+           ,("triH=",triH)
+           ,("l=",2*pi*triB)
+           ]
 
 main :: IO ()
 main = do
@@ -35,32 +39,10 @@ main = do
 -- canvas params
 canW = 800
 canH = 600
-scale_ = 100.0
--- various helpers
-rad = pi/180
-pi2 = pi*pi
-toRad :: Double -> Angle
-toRad = (rad*)
--- draw triangle with predefined sides
-tria =
-  path [p (0,0)
-       ,p (trA,0)
-       ,p (trA,trB)
-       ,p (0,0)]
-  where p (x,y) = (x*scale_,y*scale_)
--- draw arc of radius, start and end angles CW
-arc_ r s e =
-  arc (0,0) (r*scale_) s e
--- calc alpha angle of triangle by two sides, returns radians
-ang a b = asin $ a / b
--- draw circle with radius and scale it
-circ :: Double -> Picture ()
-circ r = stroke $ circle (0,0) (r*scale_)
+scale_ = 60.0
 -- just draw background as filled rectangle
 bg :: Picture ()
 bg = color black $ fill $ rect (0,0) (canW,canH)
--- calculate arc length by radius and angle in radians
-arcLen r = \a -> a * r
 -- define radius of circle of 6 units length
 l6r = 0.954929658551372014614
 -- predefined colors
@@ -69,3 +51,31 @@ red     = RGBA 255 0 0 1
 green   = RGBA 0 255 0 1
 yellow  = RGBA 255 255 0 1
 white   = RGBA 255 255 255 1
+
+type Degree = Double
+type Radian = Double
+
+-- thriginometry functions
+rad = pi/180
+toRad :: Degree -> Radian
+toRad = (rad*)
+toGrad :: Radian -> Degree
+toGrad r = r*(180/pi)
+
+hypo a b = sqrt $ a*a + b*b
+
+arcLen :: Double -> Degree -> Double
+arcLen r a =  pi * r * a / 180
+
+triAngleR :: Double -> Double -> Radian
+triAngleR b h = asin $ b / h
+
+triAngleD :: Double -> Double -> Degree
+triAngleD b h = toGrad $ triAngleR b h
+
+-- drawing functions
+arcR r a = arc (0,0) (r*scale_) 0 a
+arcD r a = arcR r (toRad a)
+
+triL a b = path[(0,0),(a*scale_,0),(a*scale_,b*scale_),(0,0)]
+circ r = circle (0,0) (r*scale_)
