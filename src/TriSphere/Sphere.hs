@@ -16,18 +16,21 @@ animate can time = do
       translate (-canW/2,0) $ color yellow $ statusBar
   setTimeout 10 $ animate can (time+1)
   where sphereR = triH
-        triA = 1.0
-        triB = 4
+        triA = 1.7323
+        triB = 1.0
         triH = hypo triA triB
         triAng = triAngleD triB triH
-        
+        aLen = arcLen sphereR triAng
         statusBar = do
           mapM_ (\(n,(t,v)) -> text (0,n*12) $ t ++ (show v)) $ zip [0..]
-           [("arcL=",arcLen sphereR triAng)
+           [("arcL=",aLen)
            ,("triA=",triA)
            ,("triB=",triB)
            ,("triH=",triH)
-           ,("l=",2*pi*triB)
+           ,("triAng=",triAng)
+           ,("linR=",2*pi*triB)
+           ,("arcR=",2*pi*aLen)
+           ,("raRatio=",2*pi*triB / aLen)
            ]
 
 main :: IO ()
