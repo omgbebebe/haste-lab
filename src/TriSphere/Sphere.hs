@@ -8,10 +8,14 @@ animate can time = do
   render can $ do
     bg
     translate (canW/2, canH/2) $ do
+      color (RGBA 111 111 111 0.5) $ grid 10 0.5
+      scale (-1,1) $ color (RGBA 111 111 111 0.5) $ grid 10 0.5
+      scale (1,-1) $ color (RGBA 111 111 111 0.5) $ grid 10 0.5
+      scale (-1,-1) $ color (RGBA 111 111 111 0.5) $ grid 10 0.5
       color red   $ stroke $ circ sphereR
       color green $ stroke $ triL triA triB
       color white $ scale (1,-1) $ stroke $ triL triA triB
-      color green $ stroke $ arcD sphereR triAng
+      color yellow $ stroke $ arcD sphereR triAng
       --
       translate (-canW/2,0) $ color yellow $ statusBar
   setTimeout 10 $ animate can (time+1)
@@ -32,6 +36,13 @@ animate can time = do
            ,("arcR=",2*pi*aLen)
            ,("raRatio=",2*pi*triB / aLen)
            ]
+
+grid n s = do
+  let max = n*s
+  stroke $ mapM_ (\n -> do
+                     line (n*s*scale_, 0) (n*s*scale_, max*scale_)
+                     line (0, n*s*scale_) (max*scale_, n*s*scale_)
+                 ) [0..n]
 
 main :: IO ()
 main = do
